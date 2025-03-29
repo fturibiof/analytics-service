@@ -1,6 +1,10 @@
 ---
+name: Feature Request
+about: Add a feature request
 title: "[Feature]: <title>"
-labels: [enhancement]
+labels: enhancement
+assignees: ''
+
 ---
 
 ## Problem Statement

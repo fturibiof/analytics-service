@@ -1,6 +1,10 @@
 ---
+name: Bug Report
+about: Bug Report Template
 title: "[Bug]: <title>"
-labels: [bug]
+labels: bug
+assignees: ''
+
 ---
 
 ## Description
