@@ -21,7 +21,7 @@ interface Budget {
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly httpService: HttpService) { }
+  constructor(private readonly httpService: HttpService) {}
 
   async getAnalytics(
     start?: Date,
@@ -61,8 +61,8 @@ export class AnalyticsService {
         percentage:
           b.amount > 0
             ? transactions.data
-              .filter((t: Transaction) => t.category === b.category)
-              .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
+                .filter((t: Transaction) => t.category === b.category)
+                .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
             : 0,
       }));
       return groupedByCategory;
