@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment';
@@ -21,7 +21,11 @@ interface Budget {
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly logger: Logger,
+  ) {}
+  SERVICE: string = AnalyticsService.name;
 
   async getAnalytics(
     start?: Date,
@@ -40,7 +44,10 @@ export class AnalyticsService {
     try {
       const url = process.env.URL;
       const params = { start, end };
-
+      this.logger.log(
+        `Getting analytics from ${start.toString()} to ${end.toString()}`,
+        this.SERVICE,
+      );
       const [budget, transactions] = await Promise.all([
         firstValueFrom(
           this.httpService.get<Budget[]>(url + '/budget', { params }),
@@ -49,7 +56,6 @@ export class AnalyticsService {
           this.httpService.get<Transaction[]>(url + '/transaction', { params }),
         ),
       ]);
-      console.log(`res`, budget.data, transactions.data);
       const groupedByCategory = budget.data.map((b: Budget) => ({
         category: b.category,
         budget: b.amount,
