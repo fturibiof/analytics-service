@@ -30,7 +30,7 @@ export class AnalyticsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
   SERVICE: string = AnalyticsService.name;
 
   async getAnalytics(
@@ -80,18 +80,15 @@ export class AnalyticsService {
         percentage:
           b.amount > 0
             ? transactions.data
-                .filter((t: Transaction) => t.category === b.category)
-                .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
+              .filter((t: Transaction) => t.category === b.category)
+              .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
             : 0,
       }));
       return groupedByCategory;
     } catch (error) {
-      //eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       span.setStatus({ code: SpanStatusCode.ERROR, message: error });
       throw new HttpException(
-        //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error?.response?.data || 'Failed to fetch data',
-        //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error?.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     } finally {
