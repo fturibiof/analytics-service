@@ -1,6 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
 
@@ -9,4 +9,4 @@ import { AnalyticsService } from './analytics.service';
   controllers: [AnalyticsController],
   providers: [AnalyticsService, Logger],
 })
-export class AnalyticsModule {}
+export class AnalyticsModule { }
