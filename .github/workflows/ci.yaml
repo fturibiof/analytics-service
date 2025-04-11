@@ -41,7 +41,6 @@ jobs:
         with:
           projectBaseDir: .
           args: >
-            -Dsonar.token=$SONAR_TOKEN
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.sources=.
             -Dsonar.tests=.
