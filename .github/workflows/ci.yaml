@@ -35,9 +35,19 @@ jobs:
         run: npm run build
 
       - name: SonarQube Scan
+        stage: sonarcloud
+        image:
+          name: sonarsource/sonar-scanner-cli:latest
+          entrypoint: ['']
+        cache:
+          paths:
+            - .sonar/cache
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          npm install -g sonarqube-scanner
-          sonar-scanner \
-            -Dsonar.token=$SONAR_TOKEN
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+        script:
+          - sonar-scanner  \ -Dsonar.token=$SONAR_TOKEN
+            -Dsonar.organization=$SONAR_ORGANIZATION \
+            -Dsonar.sources=. -Dsonar.tests=. \
+            -Dsonar.test.inclusions='**/*.spec.ts' \
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
