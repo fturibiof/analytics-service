@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import * as moment from 'moment';
 import {
   SpanStatusCode,
   trace,
   context,
   propagation,
 } from '@opentelemetry/api';
+import { firstValueFrom } from 'rxjs';
+import * as moment from 'moment';
 
 interface Transaction {
   id: number;
@@ -30,7 +30,7 @@ export class AnalyticsService {
   constructor(
     private readonly httpService: HttpService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
   SERVICE: string = AnalyticsService.name;
 
   async getAnalytics(
@@ -80,8 +80,8 @@ export class AnalyticsService {
         percentage:
           b.amount > 0
             ? transactions.data
-                .filter((t: Transaction) => t.category === b.category)
-                .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
+              .filter((t: Transaction) => t.category === b.category)
+              .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
             : 0,
       }));
       return groupedByCategory;
