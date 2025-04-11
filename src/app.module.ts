@@ -5,11 +5,8 @@ import { AppService } from './app.service';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [
-    PrometheusModule.register(),
-    AnalyticsModule
-  ],
+  imports: [PrometheusModule.register(), AnalyticsModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

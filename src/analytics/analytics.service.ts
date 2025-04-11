@@ -2,6 +2,12 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as moment from 'moment';
+import {
+  SpanStatusCode,
+  trace,
+  context,
+  propagation,
+} from '@opentelemetry/api';
 
 interface Transaction {
   id: number;
@@ -41,6 +47,12 @@ export class AnalyticsService {
     if (!start)
       start = new Date(moment().startOf('month').format('YYYY-MM-DD'));
     if (!end) end = new Date(moment().endOf('month').format('YYYY-MM-DD'));
+    const tracer = trace.getTracer('analytics-service');
+    const span = tracer.startSpan('call-finance-service');
+    context.with(trace.setSpan(context.active(), span), () => {
+      const headers: Record<string, string> = {};
+      propagation.inject(context.active(), headers);
+    });
     try {
       const url = process.env.URL;
       const params = { start, end };
@@ -56,6 +68,7 @@ export class AnalyticsService {
           this.httpService.get<Transaction[]>(url + '/transaction', { params }),
         ),
       ]);
+      span.setStatus({ code: SpanStatusCode.OK });
       const groupedByCategory = budget.data.map((b: Budget) => ({
         category: b.category,
         budget: b.amount,
@@ -73,12 +86,16 @@ export class AnalyticsService {
       }));
       return groupedByCategory;
     } catch (error) {
+      //eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error });
       throw new HttpException(
         //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error?.response?.data || 'Failed to fetch data',
         //eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error?.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    } finally {
+      span.end();
     }
   }
 }
