@@ -10,7 +10,8 @@ async function bootstrap() {
       instance: instance,
     }),
   });
-  await app.listen(process.env.PORT ?? 3001);
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
+  console.log(`App is running on ${await app.getUrl()}`);
 }
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
