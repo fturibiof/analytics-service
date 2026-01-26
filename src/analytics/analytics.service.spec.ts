@@ -4,11 +4,9 @@ import { HttpService } from '@nestjs/axios';
 import { Logger } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import * as moment from 'moment';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
-  let httpService: HttpService;
 
   const mockHttpService = {
     get: jest.fn(),
@@ -29,7 +27,6 @@ describe('AnalyticsService', () => {
     }).compile();
 
     service = module.get<AnalyticsService>(AnalyticsService);
-    httpService = module.get<HttpService>(HttpService);
   });
 
   it('should be defined', () => {
@@ -102,7 +99,7 @@ describe('AnalyticsService', () => {
         config: { headers: {} as any },
       };
 
-      mockHttpService.get.mockImplementation((url, config) => {
+      mockHttpService.get.mockImplementation((url) => {
         if (url.endsWith('/budget')) return of(mockBudgets);
         if (url.endsWith('/transaction')) return of(mockTransactions);
         if (url.endsWith('/investment')) return of(mockInvestments);
