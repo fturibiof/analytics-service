@@ -25,6 +25,17 @@ interface Budget {
   endDate: Date;
 }
 
+interface Investment {
+  id: number;
+  name: string;
+  ticker: string;
+  type: string;
+  amount: number;
+  purchasePrice: number;
+  currentPrice?: number;
+  purchaseDate: Date;
+}
+
 @Injectable()
 export class AnalyticsService {
   constructor(
@@ -36,14 +47,19 @@ export class AnalyticsService {
   async getAnalytics(
     start?: Date,
     end?: Date,
-  ): Promise<
-    {
+  ): Promise<{
+    analytics: {
       category: string;
       budget: number;
       transactions: Transaction[];
       percentage: number;
-    }[]
-  > {
+    }[];
+    investments: {
+      type: string;
+      investments: Investment[];
+      totalBalance: number;
+    }[];
+  }> {
     if (!start)
       start = new Date(moment().startOf('month').format('YYYY-MM-DD'));
     if (!end) end = new Date(moment().endOf('month').format('YYYY-MM-DD'));
@@ -60,12 +76,15 @@ export class AnalyticsService {
         `Getting analytics from ${start.toString()} to ${end.toString()}`,
         this.SERVICE,
       );
-      const [budget, transactions] = await Promise.all([
+      const [budget, transactions, investments] = await Promise.all([
         firstValueFrom(
           this.httpService.get<Budget[]>(url + '/budget', { params }),
         ),
         firstValueFrom(
           this.httpService.get<Transaction[]>(url + '/transaction', { params }),
+        ),
+        firstValueFrom(
+          this.httpService.get<Investment[]>(url + '/investment', { params }),
         ),
       ]);
       span.setStatus({ code: SpanStatusCode.OK });
@@ -84,7 +103,35 @@ export class AnalyticsService {
                 .reduce((acc, cur) => (acc += cur.amount), 0) / b.amount
             : 0,
       }));
-      return groupedByCategory;
+
+      const filteredInvestments = investments.data.filter((i) =>
+        moment(i.purchaseDate).isSameOrBefore(end),
+      );
+
+      const groupedInvestments = filteredInvestments.reduce(
+        (acc, inv) => {
+          if (!acc[inv.type]) {
+            acc[inv.type] = {
+              type: inv.type,
+              investments: [],
+              totalBalance: 0,
+            };
+          }
+          acc[inv.type].investments.push(inv);
+          acc[inv.type].totalBalance +=
+            inv.amount * (inv.currentPrice ?? inv.purchasePrice);
+          return acc;
+        },
+        {} as Record<
+          string,
+          { type: string; investments: Investment[]; totalBalance: number }
+        >,
+      );
+
+      return {
+        analytics: groupedByCategory,
+        investments: Object.values(groupedInvestments),
+      };
     } catch (error) {
       span.setStatus({ code: SpanStatusCode.ERROR, message: error });
       throw new HttpException(

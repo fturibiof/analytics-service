@@ -10,6 +10,7 @@ async function bootstrap() {
       instance: instance,
     }),
   });
+  app.enableCors();
   await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
